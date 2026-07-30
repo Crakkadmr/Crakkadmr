@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Check out the profile repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Generate statistics
         env:
