@@ -54,8 +54,8 @@ def prepare_photo(
     gray = ImageEnhance.Sharpness(gray).enhance(1.35)
     gray = ImageEnhance.Brightness(gray).enhance(1.04)
 
-    # Darken mid-tones so whiskers, eyes and the headphone band survive the
-    # heavy downscale into character cells.
+    # Darken mid-tones so eyes, facial contours and fine background details
+    # survive the heavy downscale into character cells.
     gray = gray.point(lambda value: int(255 * (value / 255) ** 1.28))
     return color, gray
 
@@ -103,9 +103,9 @@ def build_svg(lines: list[list[tuple[str, str]]], cols: int) -> str:
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" '
         f'height="{height}" viewBox="0 0 {width} {height}" '
         f'font-family="{FONT_FAMILY}" role="img" aria-labelledby="title desc">',
-        '<title id="title">Crakkadmr ASCII cat portrait</title>',
-        '<desc id="desc">A full-scene, self-typing, color ASCII portrait of a cat '
-        "wearing headphones and sitting at a laptop.</desc>",
+        '<title id="title">Crakkadmr ASCII portrait</title>',
+        '<desc id="desc">A full-scene, self-typing, color ASCII portrait '
+        "generated from Crakkadmr's profile photo.</desc>",
         f"<style>{ramp_font}.portrait{{fill:#d6b483}}"
         ".cursor{fill:#0f766e}"
         "@media(prefers-color-scheme:dark){.cursor{fill:#5eead4}}</style>",

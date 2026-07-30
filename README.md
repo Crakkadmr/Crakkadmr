@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/portrait.svg" width="620" alt="Crakkadmr — self-typing full-scene ASCII cat portrait" />
+<img src="./assets/portrait.svg" width="620" alt="Crakkadmr — self-typing full-scene ASCII portrait" />
 
 <samp>IT ENGINEER · BACKEND</samp>
 
