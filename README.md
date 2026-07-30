@@ -1,9 +1,5 @@
 <div align="center">
 
-<img src="./assets/portrait-source.jpg" width="460" alt="A cat wearing headphones and sitting at a laptop" />
-
-<br>
-
 <img src="./assets/portrait.svg" width="620" alt="Crakkadmr — self-typing full-scene ASCII cat portrait" />
 
 <samp>IT ENGINEER · BACKEND</samp>
