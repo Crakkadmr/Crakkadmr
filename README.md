@@ -1,7 +1,8 @@
 <div align="center">
 
-<img src="./assets/profile-portrait-mono.svg" width="620" alt="Crakkadmr — self-typing monochrome ASCII portrait" />
+<img src="./assets/backend-system-hero.png" width="820" alt="Monochrome backend systems architecture" />
 
+<br>
 <samp>IT ENGINEER · BACKEND</samp>
 
 <br>
@@ -159,15 +160,13 @@ Release and distribution channel for verified Windows installation packages.
 
 <img src="./assets/heading-page.svg" width="620" alt="Bu sayfa / This page" />
 
-Bu profildeki tüm grafikler doğrudan bu depoda üretilir. ASCII portre<br>
-[`scripts/generate_portrait.py`](scripts/generate_portrait.py) ile fotoğraftan oluşturulur;<br>
-katkı, seri, dil ve yıllık aktivite grafikleri ise her gün<br>
-[`refresh-profile.yml`](.github/workflows/refresh-profile.yml) tarafından yenilenir.
+Ana görsel; istek akışı, servis katmanı, veri depoları ve teslim döngüsünden oluşan<br>
+bir backend sistem mimarisini temsil eder. Katkı, seri, dil ve yıllık aktivite grafikleri<br>
+her gün [`refresh-profile.yml`](.github/workflows/refresh-profile.yml) tarafından yenilenir.
 
-Every graphic on this profile is generated inside this repository. The ASCII portrait<br>
-comes from the source photo through [`scripts/generate_portrait.py`](scripts/generate_portrait.py);<br>
-contribution, streak, language and yearly activity graphics are refreshed daily by<br>
-[`refresh-profile.yml`](.github/workflows/refresh-profile.yml).
+The hero represents a backend system through request flows, service modules, data stores<br>
+and a delivery loop. Contribution, streak, language and yearly activity graphics are<br>
+refreshed daily by [`refresh-profile.yml`](.github/workflows/refresh-profile.yml).
 
 İstatistik workflow'u yalnızca GitHub'ın yerleşik `GITHUB_TOKEN` yetkisini kullanır ve<br>
 herkese açık depo verilerini okur. Beeyazilim özeti gizlilik nedeniyle yerel olarak doğrulanmış,<br>
@@ -177,4 +176,7 @@ The statistics workflow uses only GitHub's built-in `GITHUB_TOKEN` and reads pub
 data. The Beeyazilim snapshot is locally verified, anonymized and kept as a static lower bound<br>
 so private organization details never enter the public automation.
 
-No third-party stat cards, no external image services, and no personal access token.
+Ana görsel ve üretilen grafikler doğrudan bu depodan sunulur.<br>
+The hero and generated graphics are served directly from this repository.
+
+No third-party stat cards, no runtime image services, and no personal access token.
