@@ -40,14 +40,12 @@ def parse_crop(value: str) -> tuple[int, int, int, int]:
 def prepare_photo(
     source: Path,
     crop: tuple[int, int, int, int] | None,
-) -> tuple[Image.Image, Image.Image]:
+) -> Image.Image:
     image = Image.open(source).convert("RGB")
     if crop:
         image = image.crop(crop)
-    color = ImageEnhance.Color(image).enhance(1.16)
-    color = ImageEnhance.Contrast(color).enhance(1.08)
 
-    gray = ImageOps.grayscale(color)
+    gray = ImageOps.grayscale(image)
     gray = ImageOps.autocontrast(gray, cutoff=1)
     gray = gray.filter(ImageFilter.GaussianBlur(0.45))
     gray = ImageEnhance.Contrast(gray).enhance(1.55)
@@ -56,46 +54,25 @@ def prepare_photo(
 
     # Darken mid-tones so eyes, facial contours and fine background details
     # survive the heavy downscale into character cells.
-    gray = gray.point(lambda value: int(255 * (value / 255) ** 1.28))
-    return color, gray
+    return gray.point(lambda value: int(255 * (value / 255) ** 1.28))
 
 
-def display_color(pixel: tuple[int, int, int]) -> str:
-    """Lift dark source colors so every glyph remains visible on GitHub."""
-    red, green, blue = (min(255, round(38 + channel * 0.85)) for channel in pixel)
-    return f"#{red:02x}{green:02x}{blue:02x}"
-
-
-def to_ascii(
-    images: tuple[Image.Image, Image.Image],
-    cols: int,
-) -> list[list[tuple[str, str]]]:
-    color, gray = images
-    rows = max(1, round(cols * gray.height / gray.width * ROW_RATIO))
-    color = color.resize((cols, rows), Image.Resampling.LANCZOS)
-    gray = gray.resize((cols, rows), Image.Resampling.LANCZOS)
-    colors = list(color.get_flattened_data())
-    values = list(gray.get_flattened_data())
+def to_ascii(image: Image.Image, cols: int) -> list[str]:
+    rows = max(1, round(cols * image.height / image.width * ROW_RATIO))
+    image = image.resize((cols, rows), Image.Resampling.LANCZOS)
+    values = list(image.get_flattened_data())
     last = len(RAMP) - 1
-    lines: list[list[tuple[str, str]]] = []
+    lines: list[str] = []
     for row in range(rows):
-        line = [
-            (
-                RAMP[
-                    min(
-                        last,
-                        round((255 - values[row * cols + col]) / 255 * last),
-                    )
-                ],
-                display_color(colors[row * cols + col]),
-            )
+        line = "".join(
+            RAMP[min(last, round((255 - values[row * cols + col]) / 255 * last))]
             for col in range(cols)
-        ]
+        )
         lines.append(line)
     return lines
 
 
-def build_svg(lines: list[list[tuple[str, str]]], cols: int) -> str:
+def build_svg(lines: list[str], cols: int) -> str:
     width = round(cols * CHAR_WIDTH + PADDING * 2)
     height = round(len(lines) * LINE_HEIGHT + PADDING * 2)
     ramp_font = font_face("jbmono-ramp.woff2", 400)
@@ -104,12 +81,10 @@ def build_svg(lines: list[list[tuple[str, str]]], cols: int) -> str:
         f'height="{height}" viewBox="0 0 {width} {height}" '
         f'font-family="{FONT_FAMILY}" role="img" aria-labelledby="title desc">',
         '<title id="title">Crakkadmr ASCII portrait</title>',
-        '<desc id="desc">A full-scene, self-typing, color ASCII portrait '
+        '<desc id="desc">A full-scene, self-typing, monochrome ASCII portrait '
         "generated from Crakkadmr's profile photo.</desc>",
-        f"<style>{ramp_font}.portrait{{fill:#d6b483}}"
-        ".cursor{fill:#0f766e}"
-        "@media(prefers-color-scheme:dark){.cursor{fill:#5eead4}}</style>",
-        f'<rect width="{width}" height="{height}" rx="12" fill="#0b111a"/>',
+        f"<style>{ramp_font}.portrait,.cursor{{fill:#d1d5db}}</style>",
+        f'<rect width="{width}" height="{height}" rx="12" fill="#0d1117"/>',
     ]
 
     for index, line in enumerate(lines):
@@ -127,12 +102,7 @@ def build_svg(lines: list[list[tuple[str, str]]], cols: int) -> str:
         parts.append(
             f'<text xml:space="preserve" x="{PADDING}" '
             f'y="{y + FONT_SIZE - 0.8:.1f}" font-size="{FONT_SIZE}" '
-            f'class="portrait" clip-path="url(#{clip_id})">'
-            + "".join(
-                f'<tspan fill="{color}">{escape(character)}</tspan>'
-                for character, color in line
-            )
-            + "</text>"
+            f'class="portrait" clip-path="url(#{clip_id})">{escape(line)}</text>'
         )
         parts.append(
             f'<rect y="{y + 1:.1f}" width="3.5" height="{FONT_SIZE:.1f}" '
@@ -159,7 +129,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=ASSET_DIR / "profile-portrait.svg",
+        default=ASSET_DIR / "profile-portrait-mono.svg",
     )
     parser.add_argument(
         "--crop",
@@ -172,7 +142,7 @@ def main() -> None:
 
     lines = to_ascii(prepare_photo(args.source, args.crop), args.cols)
     if args.preview:
-        print("\n".join("".join(character for character, _ in line) for line in lines))
+        print("\n".join(lines))
     changed = write_if_changed(args.output, build_svg(lines, args.cols))
     state = "updated" if changed else "unchanged"
     print(f"{state}: {args.output} ({len(lines)} rows, {args.cols} columns)")

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/profile-portrait.svg" width="620" alt="Crakkadmr — self-typing full-scene ASCII portrait" />
+<img src="./assets/profile-portrait-mono.svg" width="620" alt="Crakkadmr — self-typing monochrome ASCII portrait" />
 
 <samp>IT ENGINEER · BACKEND</samp>
 
