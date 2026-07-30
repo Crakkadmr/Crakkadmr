@@ -156,7 +156,11 @@ def main() -> None:
         type=Path,
         default=ROOT / "assets" / "portrait-source.jpg",
     )
-    parser.add_argument("--output", type=Path, default=ASSET_DIR / "portrait.svg")
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=ASSET_DIR / "profile-portrait.svg",
+    )
     parser.add_argument(
         "--crop",
         type=parse_crop,
