@@ -103,6 +103,29 @@ def fetch_profile(token: str) -> dict:
     return user
 
 
+def fetch_stable_profile(token: str, attempts: int = 4) -> dict:
+    """Prefer the newest snapshot while GitHub's contribution cache converges.
+
+    Immediately after new commits, GitHub's GraphQL edge can briefly alternate
+    between an older and newer contribution calendar for the same UTC window.
+    Sampling a few responses and choosing the highest contribution/active-day
+    pair prevents generated SVGs from flipping back and forth.
+    """
+    snapshots = [fetch_profile(token) for _ in range(attempts)]
+
+    def score(user: dict) -> tuple[int, int]:
+        calendar = user["contributionsCollection"]["contributionCalendar"]
+        days = (
+            day
+            for week in calendar["weeks"]
+            for day in week["contributionDays"]
+        )
+        active_days = sum(day["contributionCount"] > 0 for day in days)
+        return calendar["totalContributions"], active_days
+
+    return max(snapshots, key=score)
+
+
 def calculate_streaks(days: list[dict]) -> tuple[dict, dict]:
     longest = {"length": 0, "start": None, "end": None}
     length = 0
@@ -475,7 +498,7 @@ def main() -> None:
     if not token:
         raise SystemExit("GITHUB_TOKEN is not set")
 
-    summary = summarise(fetch_profile(token))
+    summary = summarise(fetch_stable_profile(token))
     graphics = {
         "stats.svg": draw_stats(summary),
         "streak.svg": draw_streaks(summary),
@@ -484,7 +507,12 @@ def main() -> None:
     }
     headings = {
         "heading-about.svg": "hakkimda / about",
+        "heading-focus.svg": "odak / current focus",
+        "heading-organization.svg": "beeyazilim / organization",
+        "heading-expertise.svg": "uzmanlik / expertise",
+        "heading-evidence.svg": "katki ozeti / contribution snapshot",
         "heading-stack.svg": "teknolojiler / stack",
+        "heading-principles.svg": "yaklasim / engineering approach",
         "heading-projects.svg": "projeler / projects",
         "heading-stats.svg": "istatistikler / stats",
         "heading-page.svg": "bu sayfa / this page",

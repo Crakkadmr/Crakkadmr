@@ -6,7 +6,8 @@ GitHub statistics, while the portrait changes only when its source photo does.
 
 Usage:
     python scripts/generate_portrait.py
-    python scripts/generate_portrait.py --crop 145,75,380,285 --preview
+    python scripts/generate_portrait.py --preview
+    python scripts/generate_portrait.py --crop 145,75,380,285
 """
 
 from __future__ import annotations
@@ -14,19 +15,18 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 from svg_theme import ASSET_DIR, FONT_FAMILY, ROOT, escape, font_face, write_if_changed
 
 RAMP = " .`:-=+*cs#%@"
-DEFAULT_CROP = (145, 75, 380, 285)
-COLS = 78
+COLS = 86
 ROW_RATIO = 0.49
-FONT_SIZE = 12.5
+FONT_SIZE = 11.5
 CHAR_WIDTH = FONT_SIZE * 0.6
-LINE_HEIGHT = 14.5
-PADDING = 18
-ROW_DELAY = 0.075
+LINE_HEIGHT = 13.2
+PADDING = 16
+ROW_DELAY = 0.065
 ROW_DURATION = 0.30
 
 
@@ -37,29 +37,23 @@ def parse_crop(value: str) -> tuple[int, int, int, int]:
     return parts
 
 
-def prepare_photo(source: Path, crop: tuple[int, int, int, int]) -> Image.Image:
-    image = Image.open(source).convert("RGB").crop(crop)
+def prepare_photo(
+    source: Path,
+    crop: tuple[int, int, int, int] | None,
+) -> Image.Image:
+    image = Image.open(source).convert("RGB")
+    if crop:
+        image = image.crop(crop)
     gray = ImageOps.grayscale(image)
     gray = ImageOps.autocontrast(gray, cutoff=1)
     gray = gray.filter(ImageFilter.GaussianBlur(0.45))
-    gray = ImageEnhance.Contrast(gray).enhance(1.65)
+    gray = ImageEnhance.Contrast(gray).enhance(1.55)
     gray = ImageEnhance.Sharpness(gray).enhance(1.35)
-
-    # A soft oval keeps attention on the cat's face and headphones while
-    # mapping the patterned wall and couch to the blank end of the ramp.
-    mask = Image.new("L", gray.size, 0)
-    inset_x = max(3, int(gray.width * 0.035))
-    inset_y = max(3, int(gray.height * 0.015))
-    ImageDraw.Draw(mask).ellipse(
-        (inset_x, inset_y, gray.width - inset_x, gray.height - inset_y),
-        fill=255,
-    )
-    mask = mask.filter(ImageFilter.GaussianBlur(max(7, int(gray.width * 0.055))))
-    gray = Image.composite(gray, Image.new("L", gray.size, 255), mask)
+    gray = ImageEnhance.Brightness(gray).enhance(1.04)
 
     # Darken mid-tones so whiskers, eyes and the headphone band survive the
     # heavy downscale into character cells.
-    return gray.point(lambda value: int(255 * (value / 255) ** 1.38))
+    return gray.point(lambda value: int(255 * (value / 255) ** 1.28))
 
 
 def to_ascii(image: Image.Image, cols: int) -> list[str]:
@@ -139,7 +133,11 @@ def main() -> None:
         default=ROOT / "assets" / "portrait-source.jpg",
     )
     parser.add_argument("--output", type=Path, default=ASSET_DIR / "portrait.svg")
-    parser.add_argument("--crop", type=parse_crop, default=DEFAULT_CROP)
+    parser.add_argument(
+        "--crop",
+        type=parse_crop,
+        help="optional left,top,right,bottom crop; omitted means the full photo",
+    )
     parser.add_argument("--cols", type=int, default=COLS)
     parser.add_argument("--preview", action="store_true")
     args = parser.parse_args()
