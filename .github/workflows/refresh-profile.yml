@@ -21,11 +21,13 @@ jobs:
       - name: Check out the profile repository
         uses: actions/checkout@v7
 
-      - name: Generate statistics
+      - name: Generate profile graphics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_LOGIN: ${{ github.repository_owner }}
-        run: python3 scripts/generate_stats.py
+        run: |
+          python3 scripts/generate_ascii_system.py
+          python3 scripts/generate_stats.py
 
       - name: Commit changed graphics
         shell: bash
