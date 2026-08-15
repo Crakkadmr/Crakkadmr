@@ -43,6 +43,3 @@ ASP.NET Core APIs and React/Next.js clients.
 <img src="./assets/year.svg" width="620" alt="Contribution activity over the last year" />
 
 </div>
-
-<img src="./assets/heading-page.svg" width="620" alt="Bu sayfa / This page" />
-
